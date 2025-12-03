@@ -58,7 +58,8 @@
                     },
                     "keySource": "Microsoft.Storage"
                 },
-                "accessTier": "Hot"
+                "accessTier": "Hot",
+                "allowSharedKeyAccess": true
             }
         },
         {
