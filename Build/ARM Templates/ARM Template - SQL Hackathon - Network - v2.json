@@ -38,6 +38,9 @@
                 "tier": "Standard"
             },
             "kind": "StorageV2",
+            "tags": {
+                "SecurityControl": "Ignore"
+            },
             "properties": {
                 "networkAcls": {
                     "bypass": "AzureServices",
