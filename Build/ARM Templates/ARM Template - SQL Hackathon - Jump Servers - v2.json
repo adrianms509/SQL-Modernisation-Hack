@@ -48,7 +48,7 @@
     },
     "variables": {
         "location": "[resourceGroup().location]",
-        "virtualMachineSize": "Standard_D2s_v3",
+        "virtualMachineSize": "Standard_D2s_v5",
         "jbVirtualMachineName": "vm-TEAM",
         "jbNetworkSecurityGroupName": "[concat('nsg-',variables('jbVirtualMachineName'))]",
         "jbNetworkInterfaceName": "[concat( 'nic-', variables('jbVirtualMachineName'))]",
