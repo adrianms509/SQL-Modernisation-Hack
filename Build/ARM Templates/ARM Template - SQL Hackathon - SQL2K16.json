@@ -21,12 +21,12 @@
                 "description": "Storage account with source files for post deployment"
             }
         },
-        "sasToken": {
+        "sasTokenBuildContainer": {
             "type": "string",
             "metadata": {
-                "description": "sas token"
+                "description": "sas token for the build storage container"
             }
-        }        ,
+        },
         "dbCount": 
         {
             "type": "int",
@@ -279,7 +279,7 @@
                     "timestamp":123456783                                             
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlCustomScriptFileName'), ' -AdminUsername ', parameters('adminUsername'),' -AdminPassword ', parameters('adminPassword'),' -storageAccountName ',parameters('storageAccount'),' -sasToken ', parameters('sasToken'),' -dbCount ', parameters('dbCount'))]" ,
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlCustomScriptFileName'), ' -AdminUsername \"', parameters('adminUsername'), '\" -AdminPassword \"', parameters('adminPassword'), '\" -storageAccountName \"', parameters('storageAccount'), '\" -sasTokenBuildContainer \"', parameters('sasTokenBuildContainer'), -dbCount ', parameters('dbCount'))]",
                     "storageAccountName": "[parameters('storageAccount')]",
                     "storageAccountKey": "[Concat(listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]",
                     "fileUris": [

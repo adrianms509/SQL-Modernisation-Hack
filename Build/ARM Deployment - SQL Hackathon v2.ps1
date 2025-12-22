@@ -273,12 +273,12 @@ $filesToUpload = Get-ChildItem -File -Recurse -Path $sourceRootPath
 Write-Host -BackgroundColor Black -ForegroundColor Yellow "Creating legacySQL2012 Server................................................."
 
 $TemplateUri = (Join-Path $CurrentDir "ARM Templates\ARM Template - SQL Hackathon - SQL2k12.json")
-New-AzResourceGroupDeployment -ResourceGroupName $SharedRG -TemplateUri $TemplateUri -adminPassword $adminpassword -adminUsername $adminUsername -storageAccount $StorageAccount -sasTokenBuildContainer $JsonSASUriContainerBuild -sasTokenMigrationContainer $Key0 -Name "LegacySQL2012" -dbCount $TeamVMCount  -AsJob 
+New-AzResourceGroupDeployment -ResourceGroupName $SharedRG -TemplateUri $TemplateUri -adminPassword $adminpassword -adminUsername $adminUsername -storageAccount $StorageAccount -sasTokenBuildContainer $SASUriContainerBuild -sasTokenMigrationContainer $Key0 -Name "LegacySQL2012" -dbCount $TeamVMCount -AsJob 
 
 Write-Host -BackgroundColor Black -ForegroundColor Yellow "Creating legacySQL2016 Server................................................."
 
 $TemplateUri = (Join-Path $CurrentDir "ARM Templates\ARM Template - SQL Hackathon - SQL2K16.json")
-New-AzResourceGroupDeployment -ResourceGroupName $SharedRG -TemplateUri $TemplateUri  -adminPassword $adminpassword -adminUsername $adminUsername -storageAccount $StorageAccount -sasToken $JsonSASUriContainerBuild -Name "LegacySQL2K16" -dbCount $TeamVMCount  #-AsJob 
+New-AzResourceGroupDeployment -ResourceGroupName $SharedRG -TemplateUri $TemplateUri  -adminPassword $adminpassword -adminUsername $adminUsername -storageAccount $StorageAccount -sasTokenBuildContainer $SASUriContainerBuild -Name "LegacySQL2K16" -dbCount $TeamVMCount  #-AsJob 
 
 Restart-AzVM -ResourceGroupName  $SharedRG -Name legacysql2016
 Write-host "legacysql2016 restarted "

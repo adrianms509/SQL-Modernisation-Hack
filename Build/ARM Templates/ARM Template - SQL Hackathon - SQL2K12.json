@@ -285,7 +285,7 @@
                     "timestamp":123456783                                             
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlCustomScriptFileName'), ' -AdminUsername ', parameters('adminUsername'),' -AdminPassword ', parameters('adminPassword'),' -storageAccountName ',parameters('storageAccount'),' -sasTokenBuildContainer ', parameters('sasTokenBuildContainer'),' -sasTokenMigrationContainer ', parameters('sasTokenMigrationContainer'),' -dbCount ', parameters('dbCount'))]" ,
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlCustomScriptFileName'), ' -AdminUsername \"', parameters('adminUsername'), '\" -AdminPassword \"', parameters('adminPassword'), '\" -storageAccountName \"', parameters('storageAccount'), '\" -sasTokenBuildContainer \"', parameters('sasTokenBuildContainer'), '\" -sasTokenMigrationContainer \"', parameters('sasTokenMigrationContainer'), '\" -dbCount ', parameters('dbCount'))]",
                     "storageAccountName": "[parameters('storageAccount')]",
                     "storageAccountKey": "[Concat(listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]",
                     "fileUris": [
