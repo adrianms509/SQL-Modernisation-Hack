@@ -364,6 +364,6 @@ Write-Host -BackgroundColor Black -ForegroundColor Yellow "Enviroment Build in p
 Write-Warning "NOTE: THE FOLLOWING POST BUILD TASKS ARE REQUIRED."
 Write-Warning "1. DataFactory Build Ok. You will need to start the SSIS integration runtime and enable AHUB"
 Write-Warning "2. Restore databases for SSIS + Monitoring labs by running the Launch_SQL_MI_configuration.ps1. Choose a remote TEAM VM. Note: Only run once."
-Write-Warning "3. All labs and documaention can be found on TEAMVM's in C:\_SQLHACK_\LABS"
+Write-Warning "3. All labs and documention can be found on TEAMVM's in C:\_SQLHACK_\LABS"
 
 
