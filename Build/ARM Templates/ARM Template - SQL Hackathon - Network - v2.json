@@ -30,7 +30,7 @@
     "resources": [
         {
             "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2019-04-01",
+            "apiVersion": "2022-09-01",
             "name": "[variables('storageAccountName')]",
             "location": "[variables('location')]",
             "sku": {
@@ -41,7 +41,11 @@
             "tags": {
                 "SecurityControl": "Ignore"
             },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+            ],
             "properties": {
+                "publicNetworkAccess": "Enabled",
                 "networkAcls": {
                     "bypass": "AzureServices",
                     "virtualNetworkRules": [],
