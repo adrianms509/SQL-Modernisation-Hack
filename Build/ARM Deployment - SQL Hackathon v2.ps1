@@ -229,6 +229,7 @@ DownloadWithRetry "https://go.microsoft.com/fwlink/?LinkId=708343" "$CopyPath\St
 DownloadWithRetry "https://download.visualstudio.microsoft.com/download/pr/3f56df9d-6dc0-4897-a49b-ea891f9ad0f4/076e353a29908c70e24ba8b8d0daefb8/windowsdesktop-runtime-3.1.21-win-x64.exe" "$CopyPath\windowsdesktop-runtime-3.1.21-win-x64.exe" 10
 DownloadWithRetry "https://go.microsoft.com/fwlink/?linkid=2133900" "$CopyPath\sql-assessment-0.6.3.vsix" 10
 DownloadWithRetry "https://go.microsoft.com/fwlink/?linkid=2099770" "$CopyPath\managed-instance-dashboard-0.4.2.vsix" 10
+DownloadWithRetry "https://go.microsoft.com/fwlink/?linkid=2324716" "$CopyPath\AzureDataStudio-Setup-1.52.0.exe" 10
 
 
 $SourcePath= (Join-Path $CurrentDir "DB_SSIS_Build\")
