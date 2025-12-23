@@ -37,7 +37,20 @@ If(-not(Get-InstalledModule Az -ErrorAction silentlycontinue)){
     Install-Module -Name Az -Scope CurrentUser -Repository PSGallery -Force -AllowClobber
 }
 
+# Ensure ThreadJob module is available for PS 5.1 compatibility
+if (-not (Get-Command Start-ThreadJob -ErrorAction SilentlyContinue)) {
+    try {
+        Install-Module ThreadJob -Scope CurrentUser -Force -AllowClobber -ErrorAction Stop
+    } catch {
+        Write-Warning ("ThreadJob install failed: {0}" -f $_.Exception.Message)
+    }
 
+    try {
+        Import-Module ThreadJob -ErrorAction Stop
+    } catch {
+        Write-Warning ("ThreadJob import failed: {0}" -f $_.Exception.Message)
+    }
+}
 
 Write-Host -BackgroundColor Black -ForegroundColor Yellow "Setting Enviroment Variables....................................................."
 $subscriptionID = (Get-AzContext).Subscription.id
@@ -320,11 +333,27 @@ $TemplateUri = (Join-Path $CurrentDir "ARM Templates\ARM Template - SQL Hackatho
 
 New-AzResourceGroupDeployment -ResourceGroupName $TeamRG -TemplateUri $TemplateUri -Name "TeamVMBuild" -vmCount $TeamVMCount -SharedResourceGroup $SharedRG -SASURIKey $JsonSASUriContainerBuild -StorageAccount $StorageAccount -adminPassword $adminpassword -adminUsername $adminUsername 
 $AzureVMsRunning = Get-AzVM -ResourceGroupName $TeamRG -status | Where-Object {$_.PowerState -eq "VM running"}
-$AzureVMsRunning | ForEach-Object -ThrottleLimit 22 -Parallel{
 
-    Restart-AzVM -ResourceGroupName $_.ResourceGroupName -Name $_.Name
-    Write-host "$($_.Name) restarted "
+# Manual throttling to 22 concurrent thread jobs
+$throttle = 22
+$jobs = @()
+foreach ($vm in $AzureVMsRunning) {
+    $rg = $vm.ResourceGroupName
+    $name = $vm.Name
+    while (($jobs | Where-Object State -eq 'Running').Count -ge $throttle) {
+        Start-Sleep -Milliseconds 300
+    }
+    $job = Start-ThreadJob -Name "Restart-$name" -ScriptBlock {
+        param($rg, $name)
+        Restart-AzVM -ResourceGroupName $rg -Name $name
+        "$name restarted"
+    } -ArgumentList $rg, $name
+    $jobs += $job
 }
+Wait-Job -Job $jobs | Out-Null
+Receive-Job -Job $jobs | ForEach-Object { Write-Host $_ }
+Remove-Job -Job $jobs
+
 Write-Host -BackgroundColor Black -ForegroundColor Yellow "Waiting for 3 minutes ........................................................."
 start-sleep -s 180
 Get-AzVM -ResourceGroupName $TeamRG -status | Where-Object {$_.PowerState -eq "VM running"} |Format-Table -Property  Name, PowerState
@@ -336,27 +365,59 @@ $ScriptPath= (Join-Path $CurrentDir $Script)
 [string]$Installed = "1" # 1 to install tool and labs,  0 for labs only
 $VMs = Get-AzVM -ResourceGroupName $TeamRG #-ResourceType Microsoft.Compute/virtualMachines
 
-$VMs | ForEach-Object -ThrottleLimit 22 -Parallel {
-    $RG = $_.ResourceGroupName
-    $VMName= $_.Name
-    $Message = "$(get-date -Format 'dd/MM/yyyy hh:mm:ss'): $VMName -- Configuration starting..."
-    write-host $Message
-    $out = Invoke-AzVMRunCommand -ResourceGroupName $RG -Name $VMName -CommandId RunPowerShellScript -ScriptPath $using:ScriptPath -Parameter @{StorageAccount = $using:StorageAccount; SASURIKey = $using:JsonSASUriContainerBuild; Installed = $using:Installed}
-    #Formating the Output with the VM name
-    if($out.value[1].Message)
-    {
-        $status= "failed" 
-        $ForegroundColor="Red"
-        $message = $out.value[1].Message
+$jobs = @()
+foreach ($vm in $VMs) {
+    $RG = $vm.ResourceGroupName
+    $VMName = $vm.Name
+    $Message = "$(Get-Date -Format 'dd/MM/yyyy hh:mm:ss'): $VMName -- Configuration starting..."
+    Write-Host $Message
+
+    $jobs = $jobs | Where-Object { $_.State -eq 'Running' }
+    while ($jobs.Count -ge $throttle) {
+        Start-Sleep -Milliseconds 300
+        $jobs = $jobs | Where-Object { $_.State -eq 'Running' }
     }
-    else {
-        $status= "successfull"
-        $ForegroundColor="White"
-        $message = ""
-    }
-    $output =  "$(get-date -Format 'dd/MM/yyyy hh:mm:ss'): $VMName -- status: $status " + $message
-    Write-host $output - -ForegroundColor  $ForegroundColor
+
+    $job = Start-ThreadJob -Name "Config-$VMName" -ScriptBlock {
+        param($rg, $vmName, $scriptPath, $storageAccount, $sasJson, $installed)
+        try {
+            $out = Invoke-AzVMRunCommand `
+                -ResourceGroupName $rg `
+                -Name $vmName `
+                -CommandId RunPowerShellScript `
+                -ScriptPath $scriptPath `
+                -Parameter @{
+                    StorageAccount = $storageAccount
+                    SASURIKey      = $sasJson
+                    Installed      = $installed
+                }
+
+            if ($out -and $out.Value -and $out.Value.Count -gt 1 -and $out.Value[1].Message) {
+                $status = "failed"
+                $ForegroundColor = "Red"
+                $message = $out.Value[1].Message
+            } else {
+                $status = "successfull"
+                $ForegroundColor = "White"
+                $message = ""
+            }
+        } catch {
+            $status = "failed"
+            $ForegroundColor = "Red"
+            $message = $_.Exception.Message
+        }
+
+        if (-not $message) { $message = "" }
+        $output = "$(Get-Date -Format 'dd/MM/yyyy hh:mm:ss'): $vmName -- status: $status " + $message
+        [pscustomobject]@{ Line = $output; Color = $ForegroundColor }
+    } -ArgumentList $RG, $VMName, $ScriptPath, $StorageAccount, $JsonSASUriContainerBuild, $Installed
+
+    $jobs += $job
 }
+
+Wait-Job -Job $jobs | Out-Null
+Receive-Job -Job $jobs | ForEach-Object { Write-Host $_.Line -ForegroundColor $_.Color }
+Remove-Job -Job $jobs
 
 
 Write-Host -BackgroundColor Black -ForegroundColor Yellow "Enviroment Build in progress. Please check RG deployments for errors."
@@ -365,5 +426,3 @@ Write-Warning "NOTE: THE FOLLOWING POST BUILD TASKS ARE REQUIRED."
 Write-Warning "1. DataFactory Build Ok. You will need to start the SSIS integration runtime and enable AHUB"
 Write-Warning "2. Restore databases for SSIS + Monitoring labs by running the Launch_SQL_MI_configuration.ps1. Choose a remote TEAM VM. Note: Only run once."
 Write-Warning "3. All labs and documention can be found on TEAMVM's in C:\_SQLHACK_\LABS"
-
-
