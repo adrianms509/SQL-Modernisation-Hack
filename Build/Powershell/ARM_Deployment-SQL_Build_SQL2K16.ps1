@@ -70,8 +70,8 @@ function IfNotExistsCreateFolder([string] $folderPath)
 }
 
 #Set Veriables
-$InstallPath = 'D:\Install'
-$BackupPath = 'D:\Backups'
+$InstallPath = 'C:\Install'
+$BackupPath = 'C:\Backups'
 $DataPath = 'F:\Data'
 
 #Create Folders for Labs and Installs
