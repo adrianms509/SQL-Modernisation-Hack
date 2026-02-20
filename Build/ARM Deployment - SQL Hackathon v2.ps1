@@ -22,8 +22,9 @@ Select-AzSubscription -Tenant '<Tenant ID>' -SubscriptionId '<Subscription ID>'
 
 #NOW RUN THE ENTIRE PS SCRIPT COMPLETING REQUESTED PARAMTERS AS PROMPTED.
 #>
-#Select-AzSubscription -Tenant '72f988bf-86f1-41af-91ab-2d7cd011db47' -SubscriptionId 'ab6dbbb5-ff85-4692-a99c-490f66eed14a'
-#Select-AzSubscription -Tenant '4fc9c688-ad9c-4d58-85c7-d141d4989ac2' -SubscriptionId 'cfdd59e1-0a35-4577-a19b-6d6a44bcf2c4'
+
+# Debug Settings: Uncomment better see inner errors of template validations
+# $PSDefaultParameterValues['New-AzResourceGroupDeployment:Debug']   = $true
 
 Write-Host -BackgroundColor Black -ForegroundColor Yellow "#################################################################################"
 Write-Host -BackgroundColor Black -ForegroundColor Yellow "SQL Server Migration Hack Build Script"
