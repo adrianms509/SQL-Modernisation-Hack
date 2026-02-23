@@ -82,9 +82,9 @@ if (($TeamVMCount = Read-Host "Please enter the number of Team VM's required (1-
 
 # }
 
-$DefaultValue = "WestEurope"
+$DefaultValue = "GermanyWestCentral"
 if (($Location = Read-Host "Please enter the Location of the Resource Groups. (default value: $DefaultValue)") -eq '') {$Location = $DefaultValue}
-If (“NorthEurope”,”WestEurope”,”UKSouth”, "UKWest", "WestUS", "EastUS" -NotContains $Location  ) {Write-Warning "Unrecognised location. Setting to Default $DefaultValue" ; $Location = "NorthEurope"}
+If (“NorthEurope”,”WestEurope”,”UKSouth”, "UKWest", "WestUS", "EastUS", "GermanyWestCentral" -NotContains $Location  ) {Write-Warning "Unrecognised location. Setting to Default $DefaultValue" ; $Location = "NorthEurope"}
 
 Write-Host -BackgroundColor Black -ForegroundColor Yellow "##################### IMPORTANT: MAKE A NOTE OF THE FOLLOWING USERNAME and PASSWORD ########################"
 Write-Host -BackgroundColor Black -ForegroundColor Yellow "The username and password specified next, will be used to credentials to SQL, Managed Instance and any VM's"
@@ -292,6 +292,21 @@ New-AzResourceGroupDeployment -ResourceGroupName $SharedRG -TemplateUri $Templat
 
 Write-Host -BackgroundColor Black -ForegroundColor Yellow "Creating legacySQL2016 Server................................................."
 
+Write-Host "================ PARAMETERS USED FOR DEPLOYMENT ================" -ForegroundColor Cyan
+ 
+Write-Host "TemplateUri:              $TemplateUri"
+Write-Host "ResourceGroup:            $SharedRG"
+ 
+Write-Host "adminUsername:            $adminUsername"
+Write-Host "adminPassword:            [securestring: $($adminPassword.Length) chars]"  # safe mask
+ 
+Write-Host "storageAccount:           $StorageAccount"
+ 
+Write-Host "sasTokenBuildContainer:   $SASUriContainerBuild"
+ 
+Write-Host "dbCount:                  $TeamVMCount"
+ 
+Write-Host "================================================================" -ForegroundColor Cyan
 $TemplateUri = (Join-Path $CurrentDir "ARM Templates\ARM Template - SQL Hackathon - SQL2K16.json")
 New-AzResourceGroupDeployment -ResourceGroupName $SharedRG -TemplateUri $TemplateUri  -adminPassword $adminpassword -adminUsername $adminUsername -storageAccount $StorageAccount -sasTokenBuildContainer $SASUriContainerBuild -Name "LegacySQL2K16" -dbCount $TeamVMCount  #-AsJob 
 
