@@ -82,9 +82,9 @@ if (($TeamVMCount = Read-Host "Please enter the number of Team VM's required (1-
 
 # }
 
-$DefaultValue = "GermanyWestCentral"
+$DefaultValue = "SwedenCentral"
 if (($Location = Read-Host "Please enter the Location of the Resource Groups. (default value: $DefaultValue)") -eq '') {$Location = $DefaultValue}
-If (“NorthEurope”,”WestEurope”,”UKSouth”, "UKWest", "WestUS", "EastUS", "GermanyWestCentral" -NotContains $Location  ) {Write-Warning "Unrecognised location. Setting to Default $DefaultValue" ; $Location = "NorthEurope"}
+If (“NorthEurope”,”WestEurope”,”UKSouth”, "UKWest", "WestUS", "EastUS", "GermanyWestCentral", "SwedenCentral" -NotContains $Location  ) {Write-Warning "Unrecognised location. Setting to Default $DefaultValue" ; $Location = "NorthEurope"}
 
 Write-Host -BackgroundColor Black -ForegroundColor Yellow "##################### IMPORTANT: MAKE A NOTE OF THE FOLLOWING USERNAME and PASSWORD ########################"
 Write-Host -BackgroundColor Black -ForegroundColor Yellow "The username and password specified next, will be used to credentials to SQL, Managed Instance and any VM's"
